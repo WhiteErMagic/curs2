@@ -1,4 +1,4 @@
-package lesson4;
+package ru.jchat.core.server;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,12 +6,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class MyWindow extends JFrame {
     private JTextArea jta;
     private JTextField jtx;
+    ClientHandler ch;
     public MyWindow() {
-        setTitle("Test Window");
+        System.out.println("Client connected");
+        setTitle("Server");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setBounds(300, 300, 400, 400);
         setLayout(new BorderLayout());
@@ -50,11 +55,22 @@ public class MyWindow extends JFrame {
             }
         });
         setVisible(true);
+        try(ServerSocket serverSocket = new ServerSocket(8189)){
+            System.out.println("Server started... Waiting clients");
+            Socket socket = serverSocket.accept();
+            ch = new ClientHandler(socket, this);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public void sendMess(){
-        jta.append(jtx.getText() + '\n');
+        ch.sendMsg(jtx.getText());
         jtx.setText("");
         jtx.grabFocus();
+    }
+
+    public void addMs(String ms){
+        jta.append(ms + '\n');
     }
 }
